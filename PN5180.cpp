@@ -43,9 +43,9 @@ PN5180::PN5180(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin, uint8_t SCK, uint
   PN5180_NSS(SSpin),
   PN5180_BUSY(BUSYpin),
   PN5180_RST(RSTpin),
-  PN5180_SCK(SCK);
-  PN5180_MISO(MISO);
-  PN5180_MOSI(MOSI);
+  PN5180_SCK(SCK),
+  PN5180_MISO(MISO),
+  PN5180_MOSI(MOSI),
   PN5180_SPI(spi)
 {
   /*
