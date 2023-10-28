@@ -16,7 +16,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 // Lesser General Public License for more details.
 //
-//#define DEBUG 1
+// #define DEBUG 1
 
 #include <Arduino.h>
 #include "PN5180.h"
@@ -24,29 +24,28 @@
 
 // PN5180 1-Byte Direct Commands
 // see 11.4.3.3 Host Interface Command List
-#define PN5180_WRITE_REGISTER           (0x00)
-#define PN5180_WRITE_REGISTER_OR_MASK   (0x01)
-#define PN5180_WRITE_REGISTER_AND_MASK  (0x02)
-#define PN5180_READ_REGISTER            (0x04)
-#define PN5180_WRITE_EEPROM				(0x06)
-#define PN5180_READ_EEPROM              (0x07)
-#define PN5180_SEND_DATA                (0x09)
-#define PN5180_READ_DATA                (0x0A)
-#define PN5180_SWITCH_MODE              (0x0B)
-#define PN5180_LOAD_RF_CONFIG           (0x11)
-#define PN5180_RF_ON                    (0x16)
-#define PN5180_RF_OFF                   (0x17)
+#define PN5180_WRITE_REGISTER (0x00)
+#define PN5180_WRITE_REGISTER_OR_MASK (0x01)
+#define PN5180_WRITE_REGISTER_AND_MASK (0x02)
+#define PN5180_READ_REGISTER (0x04)
+#define PN5180_WRITE_EEPROM (0x06)
+#define PN5180_READ_EEPROM (0x07)
+#define PN5180_SEND_DATA (0x09)
+#define PN5180_READ_DATA (0x0A)
+#define PN5180_SWITCH_MODE (0x0B)
+#define PN5180_LOAD_RF_CONFIG (0x11)
+#define PN5180_RF_ON (0x16)
+#define PN5180_RF_OFF (0x17)
 
 uint8_t PN5180::readBuffer[508];
 
-PN5180::PN5180(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin, uint8_t SCKpin, uint8_t MISOpin, uint8_t MOSIpin, SPIClass& spi) :
-  PN5180_NSS(SSpin),
-  PN5180_BUSY(BUSYpin),
-  PN5180_RST(RSTpin),
-  PN5180_SCK(SCKpin),
-  PN5180_MISO(MISOpin),
-  PN5180_MOSI(MOSIpin),
-  PN5180_SPI(spi)
+PN5180::PN5180(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin, uint8_t SCKpin, uint8_t MISOpin, uint8_t MOSIpin, SPIClass &spi) : PN5180_NSS(SSpin),
+                                                                                                                                  PN5180_BUSY(BUSYpin),
+                                                                                                                                  PN5180_RST(RSTpin),
+                                                                                                                                  PN5180_SCK(SCKpin),
+                                                                                                                                  PN5180_MISO(MISOpin),
+                                                                                                                                  PN5180_MOSI(MOSIpin),
+                                                                                                                                  PN5180_SPI(spi)
 {
   /*
    * 11.4.1 Physical Host Interface
@@ -58,8 +57,8 @@ PN5180::PN5180(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin, uint8_t SCKpin, u
   SPI_SETTINGS = SPISettings(7000000, MSBFIRST, SPI_MODE0);
 }
 
-
-void PN5180::begin() {
+void PN5180::begin()
+{
   pinMode(PN5180_NSS, OUTPUT);
   pinMode(PN5180_BUSY, INPUT);
   pinMode(PN5180_RST, OUTPUT);
@@ -69,14 +68,19 @@ void PN5180::begin() {
 
   PN5180_SPI.begin(PN5180_SCK, PN5180_MISO, PN5180_MOSI, -1);
   PN5180DEBUG(F("SPI pinout: "));
-  PN5180DEBUG(F("SS=")); PN5180DEBUG(SS);
-  PN5180DEBUG(F(", MOSI=")); PN5180DEBUG(MOSI);
-  PN5180DEBUG(F(", MISO=")); PN5180DEBUG(MISO);
-  PN5180DEBUG(F(", SCK=")); PN5180DEBUG(SCK);
+  PN5180DEBUG(F("SS="));
+  PN5180DEBUG(SS);
+  PN5180DEBUG(F(", MOSI="));
+  PN5180DEBUG(MOSI);
+  PN5180DEBUG(F(", MISO="));
+  PN5180DEBUG(MISO);
+  PN5180DEBUG(F(", SCK="));
+  PN5180DEBUG(SCK);
   PN5180DEBUG("\n");
 }
 
-void PN5180::end() {
+void PN5180::end()
+{
   digitalWrite(PN5180_NSS, HIGH); // disable
   PN5180_SPI.end();
 }
@@ -87,14 +91,16 @@ void PN5180::end() {
  * The address of the register must exist. If the condition is not fulfilled, an exception is
  * raised.
  */
-bool PN5180::writeRegister(uint8_t reg, uint32_t value) {
-  uint8_t *p = (uint8_t*)&value;
+bool PN5180::writeRegister(uint8_t reg, uint32_t value)
+{
+  uint8_t *p = (uint8_t *)&value;
 
 #ifdef DEBUG
   PN5180DEBUG(F("Write Register 0x"));
   PN5180DEBUG(formatHex(reg));
   PN5180DEBUG(F(", value (LSB first)=0x"));
-  for (int i=0; i<4; i++) {
+  for (int i = 0; i < 4; i++)
+  {
     PN5180DEBUG(formatHex(p[i]));
   }
   PN5180DEBUG("\n");
@@ -104,7 +110,7 @@ bool PN5180::writeRegister(uint8_t reg, uint32_t value) {
   For all 4 byte command parameter transfers (e.g. register values), the payload
   parameters passed follow the little endian approach (Least Significant Byte first).
    */
-  uint8_t buf[6] = { PN5180_WRITE_REGISTER, reg, p[0], p[1], p[2], p[3] };
+  uint8_t buf[6] = {PN5180_WRITE_REGISTER, reg, p[0], p[1], p[2], p[3]};
 
   PN5180_SPI.beginTransaction(SPI_SETTINGS);
   transceiveCommand(buf, 6);
@@ -121,20 +127,22 @@ bool PN5180::writeRegister(uint8_t reg, uint32_t value) {
  * The address of the register must exist. If the condition is not fulfilled, an exception is
  * raised.
  */
-bool PN5180::writeRegisterWithOrMask(uint8_t reg, uint32_t mask) {
-  uint8_t *p = (uint8_t*)&mask;
+bool PN5180::writeRegisterWithOrMask(uint8_t reg, uint32_t mask)
+{
+  uint8_t *p = (uint8_t *)&mask;
 
 #ifdef DEBUG
   PN5180DEBUG(F("Write Register 0x"));
   PN5180DEBUG(formatHex(reg));
   PN5180DEBUG(F(" with OR mask (LSB first)=0x"));
-  for (int i=0; i<4; i++) {
+  for (int i = 0; i < 4; i++)
+  {
     PN5180DEBUG(formatHex(p[i]));
   }
   PN5180DEBUG("\n");
 #endif
 
-  uint8_t buf[6] = { PN5180_WRITE_REGISTER_OR_MASK, reg, p[0], p[1], p[2], p[3] };
+  uint8_t buf[6] = {PN5180_WRITE_REGISTER_OR_MASK, reg, p[0], p[1], p[2], p[3]};
 
   PN5180_SPI.beginTransaction(SPI_SETTINGS);
   transceiveCommand(buf, 6);
@@ -151,20 +159,22 @@ bool PN5180::writeRegisterWithOrMask(uint8_t reg, uint32_t mask) {
  * The address of the register must exist. If the condition is not fulfilled, an exception is
  * raised.
  */
-bool PN5180::writeRegisterWithAndMask(uint8_t reg, uint32_t mask) {
-  uint8_t *p = (uint8_t*)&mask;
+bool PN5180::writeRegisterWithAndMask(uint8_t reg, uint32_t mask)
+{
+  uint8_t *p = (uint8_t *)&mask;
 
 #ifdef DEBUG
   PN5180DEBUG(F("Write Register 0x"));
   PN5180DEBUG(formatHex(reg));
   PN5180DEBUG(F(" with AND mask (LSB first)=0x"));
-  for (int i=0; i<4; i++) {
+  for (int i = 0; i < 4; i++)
+  {
     PN5180DEBUG(formatHex(p[i]));
   }
   PN5180DEBUG("\n");
 #endif
 
-  uint8_t buf[6] = { PN5180_WRITE_REGISTER_AND_MASK, reg, p[0], p[1], p[2], p[3] };
+  uint8_t buf[6] = {PN5180_WRITE_REGISTER_AND_MASK, reg, p[0], p[1], p[2], p[3]};
 
   PN5180_SPI.beginTransaction(SPI_SETTINGS);
   transceiveCommand(buf, 6);
@@ -180,15 +190,16 @@ bool PN5180::writeRegisterWithAndMask(uint8_t reg, uint32_t mask) {
  * The address of the register must exist. If the condition is not fulfilled, an exception is
  * raised.
  */
-bool PN5180::readRegister(uint8_t reg, uint32_t *value) {
+bool PN5180::readRegister(uint8_t reg, uint32_t *value)
+{
   PN5180DEBUG(F("Reading register 0x"));
   PN5180DEBUG(formatHex(reg));
   PN5180DEBUG(F("...\n"));
 
-  uint8_t cmd[2] = { PN5180_READ_REGISTER, reg };
+  uint8_t cmd[2] = {PN5180_READ_REGISTER, reg};
 
   PN5180_SPI.beginTransaction(SPI_SETTINGS);
-  transceiveCommand(cmd, 2, (uint8_t*)value, 4);
+  transceiveCommand(cmd, 2, (uint8_t *)value, 4);
   PN5180_SPI.endTransaction();
 
   PN5180DEBUG(F("Register value=0x"));
@@ -201,15 +212,17 @@ bool PN5180::readRegister(uint8_t reg, uint32_t *value) {
 /*
  * WRITE_EEPROM - 0x06
  */
-bool PN5180::writeEEprom(uint8_t addr, uint8_t *buffer, uint8_t len) {
-	uint8_t cmd[len + 2];
-	cmd[0] = PN5180_WRITE_EEPROM;
-	cmd[1] = addr;
-	for (int i = 0; i < len; i++) cmd[2 + i] = buffer[i];
-	PN5180_SPI.beginTransaction(SPI_SETTINGS);
-	transceiveCommand(cmd, len + 2);
-	PN5180_SPI.endTransaction();
-	return true;
+bool PN5180::writeEEprom(uint8_t addr, uint8_t *buffer, uint8_t len)
+{
+  uint8_t cmd[len + 2];
+  cmd[0] = PN5180_WRITE_EEPROM;
+  cmd[1] = addr;
+  for (int i = 0; i < len; i++)
+    cmd[2 + i] = buffer[i];
+  PN5180_SPI.beginTransaction(SPI_SETTINGS);
+  transceiveCommand(cmd, len + 2);
+  PN5180_SPI.endTransaction();
+  return true;
 }
 
 /*
@@ -223,8 +236,10 @@ bool PN5180::writeEEprom(uint8_t addr, uint8_t *buffer, uint8_t len) {
  * not go beyond EEPROM address 254. If the condition is not fulfilled, an exception is
  * raised.
  */
-bool PN5180::readEEprom(uint8_t addr, uint8_t *buffer, int len) {
-  if ((addr > 254) || ((addr+len) > 254)) {
+bool PN5180::readEEprom(uint8_t addr, uint8_t *buffer, int len)
+{
+  if ((addr > 254) || ((addr + len) > 254))
+  {
     PN5180DEBUG(F("ERROR: Reading beyond addr 254!\n"));
     return false;
   }
@@ -235,7 +250,7 @@ bool PN5180::readEEprom(uint8_t addr, uint8_t *buffer, int len) {
   PN5180DEBUG(len);
   PN5180DEBUG(F("...\n"));
 
-  uint8_t cmd[3] = { PN5180_READ_EEPROM, addr, uint8_t(len) };
+  uint8_t cmd[3] = {PN5180_READ_EEPROM, addr, uint8_t(len)};
 
   PN5180_SPI.beginTransaction(SPI_SETTINGS);
   transceiveCommand(cmd, 3, buffer, len);
@@ -243,7 +258,8 @@ bool PN5180::readEEprom(uint8_t addr, uint8_t *buffer, int len) {
 
 #ifdef DEBUG
   PN5180DEBUG(F("EEPROM values: "));
-  for (int i=0; i<len; i++) {
+  for (int i = 0; i < len; i++)
+  {
     PN5180DEBUG(formatHex(buffer[i]));
     PN5180DEBUG(" ");
   }
@@ -252,7 +268,6 @@ bool PN5180::readEEprom(uint8_t addr, uint8_t *buffer, int len) {
 
   return true;
 }
-
 
 /*
  * SEND_DATA - 0x09
@@ -269,8 +284,10 @@ bool PN5180::readEEprom(uint8_t addr, uint8_t *buffer, int len) {
  * called during an ongoing RF transmission. Transceiver must be in ‘WaitTransmit’ state
  * with ‘Transceive’ command set. If the condition is not fulfilled, an exception is raised.
  */
-bool PN5180::sendData(uint8_t *data, int len, uint8_t validBits) {
-  if (len > 260) {
+bool PN5180::sendData(uint8_t *data, int len, uint8_t validBits)
+{
+  if (len > 260)
+  {
     PN5180DEBUG(F("ERROR: sendData with more than 260 bytes is not supported!\n"));
     return false;
   }
@@ -279,22 +296,24 @@ bool PN5180::sendData(uint8_t *data, int len, uint8_t validBits) {
   PN5180DEBUG(F("Send data (len="));
   PN5180DEBUG(len);
   PN5180DEBUG(F("):"));
-  for (int i=0; i<len; i++) {
+  for (int i = 0; i < len; i++)
+  {
     PN5180DEBUG(" ");
     PN5180DEBUG(formatHex(data[i]));
   }
   PN5180DEBUG("\n");
 #endif
 
-  uint8_t buffer[len+2];
+  uint8_t buffer[len + 2];
   buffer[0] = PN5180_SEND_DATA;
   buffer[1] = validBits; // number of valid bits of last byte are transmitted (0 = all bits are transmitted)
-  for (int i=0; i<len; i++) {
-    buffer[2+i] = data[i];
+  for (int i = 0; i < len; i++)
+  {
+    buffer[2 + i] = data[i];
   }
 
-  writeRegisterWithAndMask(SYSTEM_CONFIG, 0xfffffff8);  // Idle/StopCom Command
-  writeRegisterWithOrMask(SYSTEM_CONFIG, 0x00000003);   // Transceive Command
+  writeRegisterWithAndMask(SYSTEM_CONFIG, 0xfffffff8); // Idle/StopCom Command
+  writeRegisterWithOrMask(SYSTEM_CONFIG, 0x00000003);  // Transceive Command
   /*
    * Transceive command; initiates a transceive cycle.
    * Note: Depending on the value of the Initiator bit, a
@@ -305,13 +324,14 @@ bool PN5180::sendData(uint8_t *data, int len, uint8_t validBits) {
    */
 
   PN5180TransceiveStat transceiveState = getTransceiveState();
-  if (PN5180_TS_WaitTransmit != transceiveState) {
+  if (PN5180_TS_WaitTransmit != transceiveState)
+  {
     PN5180DEBUG(F("*** ERROR: Transceiver not in state WaitTransmit!?\n"));
     return false;
   }
 
   PN5180_SPI.beginTransaction(SPI_SETTINGS);
-  bool success = transceiveCommand(buffer, len+2);
+  bool success = transceiveCommand(buffer, len + 2);
   PN5180_SPI.endTransaction();
 
   return success;
@@ -327,8 +347,10 @@ bool PN5180::sendData(uint8_t *data, int len, uint8_t validBits) {
  * preceding an RF data reception, no exception is raised but the data read back from the
  * reception buffer is invalid. If the condition is not fulfilled, an exception is raised.
  */
-uint8_t * PN5180::readData(int len) {
-  if (len > 508) {
+uint8_t *PN5180::readData(int len)
+{
+  if (len > 508)
+  {
     Serial.println(F("*** FATAL: Reading more than 508 bytes is not supported!"));
     return 0L;
   }
@@ -337,7 +359,7 @@ uint8_t * PN5180::readData(int len) {
   PN5180DEBUG(len);
   PN5180DEBUG(F(")...\n"));
 
-  uint8_t cmd[2] = { PN5180_READ_DATA, 0x00 };
+  uint8_t cmd[2] = {PN5180_READ_DATA, 0x00};
 
   PN5180_SPI.beginTransaction(SPI_SETTINGS);
   transceiveCommand(cmd, 2, readBuffer, len);
@@ -345,7 +367,8 @@ uint8_t * PN5180::readData(int len) {
 
 #ifdef DEBUG
   PN5180DEBUG(F("Data read: "));
-  for (int i=0; i<len; i++) {
+  for (int i = 0; i < len; i++)
+  {
     PN5180DEBUG(formatHex(readBuffer[i]));
     PN5180DEBUG(" ");
   }
@@ -355,27 +378,30 @@ uint8_t * PN5180::readData(int len) {
   return readBuffer;
 }
 
-bool PN5180::readData(uint8_t len, uint8_t *buffer) {
-	if (len > 508) {
-		return false;
-	}
-	uint8_t cmd[2] = { PN5180_READ_DATA, 0x00 };
-	PN5180_SPI.beginTransaction(SPI_SETTINGS);
-	bool success = transceiveCommand(cmd, 2, buffer, len);
-	PN5180_SPI.endTransaction();
-	return success;
+bool PN5180::readData(uint8_t len, uint8_t *buffer)
+{
+  if (len > 508)
+  {
+    return false;
+  }
+  uint8_t cmd[2] = {PN5180_READ_DATA, 0x00};
+  PN5180_SPI.beginTransaction(SPI_SETTINGS);
+  bool success = transceiveCommand(cmd, 2, buffer, len);
+  PN5180_SPI.endTransaction();
+  return success;
 }
 
 /* prepare LPCD registers */
-bool PN5180::prepareLPCD() {
+bool PN5180::prepareLPCD()
+{
   //=======================================LPCD CONFIG================================================================================
   PN5180DEBUG(F("----------------------------------"));
   PN5180DEBUG(F("prepare LPCD..."));
 
   uint8_t data[255];
   uint8_t response[256];
-    //1. Set Fieldon time                                           LPCD_FIELD_ON_TIME (0x36)
-  uint8_t fieldOn = 0xF0;//0x## -> ##(base 10) x 8μs + 62 μs
+  // 1. Set Fieldon time                                           LPCD_FIELD_ON_TIME (0x36)
+  uint8_t fieldOn = 0xF0; // 0x## -> ##(base 10) x 8μs + 62 μs
   data[0] = fieldOn;
   writeEEprom(0x36, data, 1);
   readEEprom(0x36, response, 1);
@@ -383,7 +409,7 @@ bool PN5180::prepareLPCD() {
   PN5180DEBUG("LPCD-fieldOn time: ");
   PN5180DEBUG(formatHex(fieldOn));
 
-    //2. Set threshold level                                         AGC_LPCD_THRESHOLD @ EEPROM 0x37
+  // 2. Set threshold level                                         AGC_LPCD_THRESHOLD @ EEPROM 0x37
   uint8_t threshold = 0x03;
   data[0] = threshold;
   writeEEprom(0x37, data, 1);
@@ -392,8 +418,8 @@ bool PN5180::prepareLPCD() {
   PN5180DEBUG("LPCD-threshold: ");
   PN5180DEBUG(formatHex(threshold));
 
-  //3. Select LPCD mode                                               LPCD_REFVAL_GPO_CONTROL (0x38)
-  uint8_t lpcdMode = 0x01; // 1 = LPCD SELF CALIBRATION 
+  // 3. Select LPCD mode                                               LPCD_REFVAL_GPO_CONTROL (0x38)
+  uint8_t lpcdMode = 0x01; // 1 = LPCD SELF CALIBRATION
                            // 0 = LPCD AUTO CALIBRATION (this mode does not work, should look more into it, no reason why it shouldn't work)
   data[0] = lpcdMode;
   writeEEprom(0x38, data, 1);
@@ -401,18 +427,18 @@ bool PN5180::prepareLPCD() {
   lpcdMode = response[0];
   PN5180DEBUG("lpcdMode: ");
   PN5180DEBUG(formatHex(lpcdMode));
-  
+
   // LPCD_GPO_TOGGLE_BEFORE_FIELD_ON (0x39)
-  uint8_t beforeFieldOn = 0xF0; 
+  uint8_t beforeFieldOn = 0xF0;
   data[0] = beforeFieldOn;
   writeEEprom(0x39, data, 1);
   readEEprom(0x39, response, 1);
   beforeFieldOn = response[0];
   PN5180DEBUG("beforeFieldOn: ");
   PN5180DEBUG(formatHex(beforeFieldOn));
-  
+
   // LPCD_GPO_TOGGLE_AFTER_FIELD_ON (0x3A)
-  uint8_t afterFieldOn = 0xF0; 
+  uint8_t afterFieldOn = 0xF0;
   data[0] = afterFieldOn;
   writeEEprom(0x3A, data, 1);
   readEEprom(0x3A, response, 1);
@@ -427,13 +453,14 @@ bool PN5180::prepareLPCD() {
  * Parameter 'wakeupCounterInMs' must be in the range from 0x0 - 0xA82
  * max. wake-up time is 2960 ms.
  */
-bool PN5180::switchToLPCD(uint16_t wakeupCounterInMs) {
+bool PN5180::switchToLPCD(uint16_t wakeupCounterInMs)
+{
   // clear all IRQ flags
-  clearIRQStatus(0xffffffff); 
+  clearIRQStatus(0xffffffff);
   // enable only LPCD and general error IRQ
-  writeRegister(IRQ_ENABLE, LPCD_IRQ_STAT | GENERAL_ERROR_IRQ_STAT);  
-  // switch mode to LPCD 
-  uint8_t cmd[4] = { PN5180_SWITCH_MODE, 0x01, (uint8_t)(wakeupCounterInMs & 0xFF), (uint8_t)((wakeupCounterInMs >> 8U) & 0xFF) };
+  writeRegister(IRQ_ENABLE, LPCD_IRQ_STAT | GENERAL_ERROR_IRQ_STAT);
+  // switch mode to LPCD
+  uint8_t cmd[4] = {PN5180_SWITCH_MODE, 0x01, (uint8_t)(wakeupCounterInMs & 0xFF), (uint8_t)((wakeupCounterInMs >> 8U) & 0xFF)};
   PN5180_SPI.beginTransaction(SPI_SETTINGS);
   bool success = transceiveCommand(cmd, sizeof(cmd));
   PN5180_SPI.endTransaction();
@@ -458,14 +485,15 @@ bool PN5180::switchToLPCD(uint16_t wakeupCounterInMs) {
  * ->0D              ISO 15693 ASK100  26        8D              ISO 15693   26
  *   0E              ISO 15693 ASK10   26        8E              ISO 15693   53
  */
-bool PN5180::loadRFConfig(uint8_t txConf, uint8_t rxConf) {
+bool PN5180::loadRFConfig(uint8_t txConf, uint8_t rxConf)
+{
   PN5180DEBUG(F("Load RF-Config: txConf="));
   PN5180DEBUG(formatHex(txConf));
   PN5180DEBUG(F(", rxConf="));
   PN5180DEBUG(formatHex(rxConf));
   PN5180DEBUG("\n");
 
-  uint8_t cmd[3] = { PN5180_LOAD_RF_CONFIG, txConf, rxConf };
+  uint8_t cmd[3] = {PN5180_LOAD_RF_CONFIG, txConf, rxConf};
 
   PN5180_SPI.beginTransaction(SPI_SETTINGS);
   transceiveCommand(cmd, 3);
@@ -479,23 +507,29 @@ bool PN5180::loadRFConfig(uint8_t txConf, uint8_t rxConf) {
  * This command is used to switch on the internal RF field. If enabled the TX_RFON_IRQ is
  * set after the field is switched on.
  */
-bool PN5180::setRF_on() {
+bool PN5180::setRF_on()
+{
   PN5180DEBUG(F("Set RF ON\n"));
 
-  uint8_t cmd[2] = { PN5180_RF_ON, 0x00 };
+  uint8_t cmd[2] = {PN5180_RF_ON, 0x00};
 
   PN5180_SPI.beginTransaction(SPI_SETTINGS);
   transceiveCommand(cmd, 2);
   PN5180_SPI.endTransaction();
 
   unsigned long startedWaiting = millis();
-  while (0 == (TX_RFON_IRQ_STAT & getIRQStatus())) {   // wait for RF field to set up (max 500ms)
-    if (millis() - startedWaiting > 500) {
-	  PN5180DEBUG(F("Set RF ON timeout\n"));
-	  return false; 
-	}
-  }; 
-  
+  while (0 == (TX_RFON_IRQ_STAT & getIRQStatus()))
+  { // wait for RF field to set up (max 500ms)
+    if (millis() - startedWaiting > 500)
+    {
+      PN5180DEBUG(F("Set RF ON timeout\n"));
+      return false;
+    }
+
+    delay(1);
+
+  }
+
   clearIRQStatus(TX_RFON_IRQ_STAT);
   return true;
 }
@@ -505,22 +539,27 @@ bool PN5180::setRF_on() {
  * This command is used to switch off the internal RF field. If enabled, the TX_RFOFF_IRQ
  * is set after the field is switched off.
  */
-bool PN5180::setRF_off() {
+bool PN5180::setRF_off()
+{
   PN5180DEBUG(F("Set RF OFF\n"));
 
-  uint8_t cmd[2] { PN5180_RF_OFF, 0x00 };
+  uint8_t cmd[2]{PN5180_RF_OFF, 0x00};
 
   PN5180_SPI.beginTransaction(SPI_SETTINGS);
   transceiveCommand(cmd, 2);
   PN5180_SPI.endTransaction();
 
   unsigned long startedWaiting = millis();
-  while (0 == (TX_RFOFF_IRQ_STAT & getIRQStatus())) {   // wait for RF field to shut down
-    if (millis() - startedWaiting > 500) {
-	  PN5180DEBUG(F("Set RF OFF timeout\n"));
-	  return false; 
-	}
-  }; 
+  while (0 == (TX_RFOFF_IRQ_STAT & getIRQStatus()))
+  { // wait for RF field to shut down
+    if (millis() - startedWaiting > 500)
+    {
+      PN5180DEBUG(F("Set RF OFF timeout\n"));
+      return false;
+    }
+
+    delay(1);
+  }
   clearIRQStatus(TX_RFOFF_IRQ_STAT);
   return true;
 }
@@ -563,79 +602,118 @@ status register contain information on the exception.
  * 5. Wait until BUSY is low
  * If there is a parameter error, the IRQ is set to ACTIVE and a GENERAL_ERROR_IRQ is set.
  */
-bool PN5180::transceiveCommand(uint8_t *sendBuffer, size_t sendBufferLen, uint8_t *recvBuffer, size_t recvBufferLen) {
+bool PN5180::transceiveCommand(uint8_t *sendBuffer, size_t sendBufferLen, uint8_t *recvBuffer, size_t recvBufferLen)
+{
 #ifdef DEBUG
   PN5180DEBUG(F("Sending SPI frame: '"));
-  for (uint8_t i=0; i<sendBufferLen; i++) {
-    if (i>0) PN5180DEBUG(" ");
+  for (uint8_t i = 0; i < sendBufferLen; i++)
+  {
+    if (i > 0)
+      PN5180DEBUG(" ");
     PN5180DEBUG(formatHex(sendBuffer[i]));
   }
   PN5180DEBUG("'\n");
 #endif
 
-  // 0.
-  unsigned long startedWaiting = millis();
-  while (LOW != digitalRead(PN5180_BUSY)) {
-    if (millis() - startedWaiting > commandTimeout) {
-		PN5180DEBUG("transceiveCommand timeout (send/0)");
-		return false;
-	};
-  }; // wait until busy is low
-  // 1.
-  digitalWrite(PN5180_NSS, LOW); delay(1);
-  // 2.
-  PN5180_SPI.transfer((uint8_t*)sendBuffer, sendBufferLen);	
-  // 3.
-  startedWaiting = millis();
-  while (HIGH != digitalRead(PN5180_BUSY)) {
-    if (millis() - startedWaiting > commandTimeout) {
-		PN5180DEBUG("transceiveCommand timeout (send/3)");
-		return false;
-	}
-  }; // wait until busy is high
-  // 4.
-  digitalWrite(PN5180_NSS, HIGH); delay(1);
-  // 5.
-  startedWaiting = millis();
-  while (LOW != digitalRead(PN5180_BUSY)) {
-    if (millis() - startedWaiting > commandTimeout) {
-		PN5180DEBUG("transceiveCommand timeout (send/5)");
-		return false;
-	};
-  }; // wait until busy is low
+  PN5180_SPI.beginTransaction(SPI_SETTINGS);
 
-  // check, if write-only
-  if ((0 == recvBuffer) || (0 == recvBufferLen)) return true;
-  PN5180DEBUG(F("Receiving SPI frame...\n"));
+  if (sendBuffer != NULL && sendBufferLen != 0)
+  {
 
-  // 1.
-  digitalWrite(PN5180_NSS, LOW); 
-  // 2.
-  memset(recvBuffer, 0xFF, recvBufferLen);
-  PN5180_SPI.transfer(recvBuffer, recvBufferLen);
-  // 3.
-  startedWaiting = millis(); //delay(1);
-  while (HIGH != digitalRead(PN5180_BUSY)) {
-    if (millis() - startedWaiting > commandTimeout) {
-		PN5180DEBUG("transceiveCommand timeout (receive/3)");
-		return false;
-	};
-  }; // wait until busy is high
-  // 4.
-  digitalWrite(PN5180_NSS, HIGH); 
-  // 5.
-  startedWaiting = millis();
-  while (LOW != digitalRead(PN5180_BUSY)) {
-    if (millis() - startedWaiting > commandTimeout) {
-		PN5180DEBUG("transceiveCommand timeout (receive/5)");
-		return false;
-	};
-  }; // wait until busy is low
+    while (digitalRead(PN5180_BUSY) == HIGH) delay(1);
+
+    digitalWrite(PN5180_NSS, LOW);
+    delay(2);
+
+    PN5180_SPI.transfer((uint8_t *)sendBuffer, sendBufferLen);
+
+    digitalWrite(PN5180_NSS, HIGH);
+    delay(1);
+  }
+
+  if (recvBuffer != NULL && recvBufferLen != 0)
+  {
+
+    while (digitalRead(PN5180_BUSY) == HIGH) delay(1);
+
+    digitalWrite(PN5180_NSS, LOW);
+    delay(2);
+
+    memset(recvBuffer, 0xFF, recvBufferLen);
+
+    PN5180_SPI.transfer(recvBuffer, recvBufferLen);
+
+    digitalWrite(PN5180_NSS, HIGH);
+    delay(1);
+  }
+
+  PN5180_SPI.endTransaction();
+
+  // // 0.
+  // unsigned long startedWaiting = millis();
+  // while (LOW != digitalRead(PN5180_BUSY)) {
+  //   if (millis() - startedWaiting > commandTimeout) {
+  // 	PN5180DEBUG("transceiveCommand timeout (send/0)");
+  // 	return false;
+  // };
+  // }; // wait until busy is low
+  // // 1.
+  // digitalWrite(PN5180_NSS, LOW); delay(1);
+  // // 2.
+  // PN5180_SPI.transfer((uint8_t*)sendBuffer, sendBufferLen);
+  // // 3.
+  // startedWaiting = millis();
+  // while (HIGH != digitalRead(PN5180_BUSY)) {
+  //   if (millis() - startedWaiting > commandTimeout) {
+  // 	PN5180DEBUG("transceiveCommand timeout (send/3)");
+  // 	return false;
+  // }
+  // }; // wait until busy is high
+  // // 4.
+  // digitalWrite(PN5180_NSS, HIGH); delay(1);
+  // // 5.
+  // startedWaiting = millis();
+  // while (LOW != digitalRead(PN5180_BUSY)) {
+  //   if (millis() - startedWaiting > commandTimeout) {
+  // 	PN5180DEBUG("transceiveCommand timeout (send/5)");
+  // 	return false;
+  // };
+  // }; // wait until busy is low
+
+  // // check, if write-only
+  // if ((0 == recvBuffer) || (0 == recvBufferLen)) return true;
+  // PN5180DEBUG(F("Receiving SPI frame...\n"));
+
+  // // 1.
+  // digitalWrite(PN5180_NSS, LOW);
+  // // 2.
+  // memset(recvBuffer, 0xFF, recvBufferLen);
+  // PN5180_SPI.transfer(recvBuffer, recvBufferLen);
+  // // 3.
+  // startedWaiting = millis(); //delay(1);
+  // while (HIGH != digitalRead(PN5180_BUSY)) {
+  //   if (millis() - startedWaiting > commandTimeout) {
+  // 	PN5180DEBUG("transceiveCommand timeout (receive/3)");
+  // 	return false;
+  // };
+  // }; // wait until busy is high
+  // // 4.
+  // digitalWrite(PN5180_NSS, HIGH);
+  // // 5.
+  // startedWaiting = millis();
+  // while (LOW != digitalRead(PN5180_BUSY)) {
+  //   if (millis() - startedWaiting > commandTimeout) {
+  // 	PN5180DEBUG("transceiveCommand timeout (receive/5)");
+  // 	return false;
+  // };
+  // }; // wait until busy is low
 
 #ifdef DEBUG
   PN5180DEBUG(F("Received: "));
-  for (uint8_t i=0; i<recvBufferLen; i++) {
-    if (i > 0) PN5180DEBUG(" ");
+  for (uint8_t i = 0; i < recvBufferLen; i++)
+  {
+    if (i > 0)
+      PN5180DEBUG(" ");
     PN5180DEBUG(formatHex(recvBuffer[i]));
   }
   PN5180DEBUG("'\n");
@@ -647,24 +725,29 @@ bool PN5180::transceiveCommand(uint8_t *sendBuffer, size_t sendBufferLen, uint8_
 /*
  * Reset NFC device
  */
-void PN5180::reset() {
-  digitalWrite(PN5180_RST, LOW);  // at least 10us required
+void PN5180::reset()
+{
+  digitalWrite(PN5180_RST, LOW); // at least 10us required
   delay(1);
   digitalWrite(PN5180_RST, HIGH); // 2ms to ramp up required
   delay(5);
 
   unsigned long startedWaiting = millis();
-  while (0 == (IDLE_IRQ_STAT & getIRQStatus())) {
-	// wait for system to start up (with timeout)
-    if (millis() - startedWaiting > commandTimeout) {
-		PN5180DEBUG(F("reset failed (timeout)!!!\n"));
-		// try again with larger time
-		digitalWrite(PN5180_RST, LOW);  
-		delay(10);
-		digitalWrite(PN5180_RST, HIGH); 
-		delay(50);
-		return;
-	}
+  while (0 == (IDLE_IRQ_STAT & getIRQStatus()))
+  {
+    // wait for system to start up (with timeout)
+    if (millis() - startedWaiting > commandTimeout)
+    {
+      PN5180DEBUG(F("reset failed (timeout)!!!\n"));
+      // try again with larger time
+      digitalWrite(PN5180_RST, LOW);
+      delay(10);
+      digitalWrite(PN5180_RST, HIGH);
+      delay(50);
+      return;
+    }
+
+    delay(1);
   }
 }
 
@@ -672,7 +755,8 @@ void PN5180::reset() {
  * @name  getInterrupt
  * @desc  read interrupt status register and clear interrupt status
  */
-uint32_t PN5180::getIRQStatus() {
+uint32_t PN5180::getIRQStatus()
+{
   PN5180DEBUG(F("Read IRQ-Status register...\n"));
 
   uint32_t irqStatus;
@@ -685,7 +769,8 @@ uint32_t PN5180::getIRQStatus() {
   return irqStatus;
 }
 
-bool PN5180::clearIRQStatus(uint32_t irqMask) {
+bool PN5180::clearIRQStatus(uint32_t irqMask)
+{
   PN5180DEBUG(F("Clear IRQ-Status with mask=x"));
   PN5180DEBUG(formatHex(irqMask));
   PN5180DEBUG("\n");
@@ -700,11 +785,13 @@ bool PN5180::clearIRQStatus(uint32_t irqMask) {
 extern void showIRQStatus(uint32_t);
 #endif
 
-PN5180TransceiveStat PN5180::getTransceiveState() {
+PN5180TransceiveStat PN5180::getTransceiveState()
+{
   PN5180DEBUG(F("Get Transceive state...\n"));
 
   uint32_t rfStatus;
-  if (!readRegister(RF_STATUS, &rfStatus)) {
+  if (!readRegister(RF_STATUS, &rfStatus))
+  {
 #ifdef DEBUG
     showIRQStatus(getIRQStatus());
 #endif
