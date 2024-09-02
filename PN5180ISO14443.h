@@ -21,6 +21,11 @@
 
 #include "PN5180.h"
 
+#define SPEED_106KBITS    0
+#define SPEED_212KBITS  	1
+#define SPEED_424KBITS 	  2
+#define SPEED_848KBITS		3
+
 
 class PN5180ISO14443 : public PN5180 {
 
@@ -41,6 +46,7 @@ public:
    */
 public:   
   bool setupRF();
+  bool setupRF(uint8_t speed);
   int8_t readCardSerial(uint8_t *buffer);    
   bool isCardPresent();    
 };

@@ -49,6 +49,41 @@ bool PN5180ISO14443::setupRF()
 	return true;
 }
 
+
+/*
+ * speed: 0x00 106 kbps
+ * 		  0x01 212 kbps
+ * 		  0x02 424 kbps
+ * 		  0x03 848 kbps
+ * 		  other values are not supported
+ */
+bool PN5180ISO14443::setupRF(uint_8t speed)
+{	
+	if (speed>3)
+	{
+		PN5180DEBUG(F("Not Supported Value!\n"));
+		return false;
+	}
+	
+	PN5180DEBUG(F("Loading RF-Configuration...\n"));
+	if (loadRFConfig(speed, (speed+0x80)))
+	{ // ISO14443 parameters
+		PN5180DEBUG(F("done.\n"));
+	}
+	else
+		return false;
+
+	PN5180DEBUG(F("Turning ON RF field...\n"));
+	if (setRF_on())
+	{
+		PN5180DEBUG(F("done.\n"));
+	}
+	else
+		return false;
+
+	return true;
+}
+
 uint16_t PN5180ISO14443::rxBytesReceived()
 {
 	uint32_t rxStatus;
