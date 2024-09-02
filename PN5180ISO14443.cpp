@@ -23,10 +23,10 @@
 #include <PN5180.h>
 #include "Debug.h"
 
-PN5180ISO14443::PN5180ISO14443(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin, uint8_t SCKpin, uint8_t MISOpin, uint8_t MOSIpin, SPIClass &spi)
+/*PN5180ISO14443::PN5180ISO14443(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin, uint8_t SCKpin, uint8_t MISOpin, uint8_t MOSIpin, SPIClass &spi)
 	: PN5180(SSpin, BUSYpin, RSTpin, SCKpin, MISOpin, MOSIpin, spi)
 {
-}
+}*/
 PN5180ISO14443::PN5180ISO14443(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin, SPIClass& spi) 
               : PN5180(SSpin, BUSYpin, RSTpin, spi) {
 }

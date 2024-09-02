@@ -39,13 +39,30 @@
 
 uint8_t PN5180::readBuffer[508];
 
-PN5180::PN5180(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin, uint8_t SCKpin, uint8_t MISOpin, uint8_t MOSIpin, SPIClass &spi) : PN5180_NSS(SSpin),
+/*PN5180::PN5180(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin, uint8_t SCKpin, uint8_t MISOpin, uint8_t MOSIpin, SPIClass &spi) : PN5180_NSS(SSpin),
                                                                                                                                   PN5180_BUSY(BUSYpin),
                                                                                                                                   PN5180_RST(RSTpin),
                                                                                                                                   PN5180_SCK(SCKpin),
                                                                                                                                   PN5180_MISO(MISOpin),
                                                                                                                                   PN5180_MOSI(MOSIpin),
                                                                                                                                   PN5180_SPI(spi)
+{
+  /*
+   * 11.4.1 Physical Host Interface
+   * The interface of the PN5180 to a host microcontroller is based on a SPI interface,
+   * extended by signal line BUSY. The maximum SPI speed is 7 Mbps and fixed to CPOL
+   * = 0 and CPHA = 0.
+   */
+  // Settings for PN5180: 7Mbps, MSB first, SPI_MODE0 (CPOL=0, CPHA=0)
+  /*
+  SPI_SETTINGS = SPISettings(7000000, MSBFIRST, SPI_MODE0);
+}*/
+
+PN5180::PN5180(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin, SPIClass& spi) :
+  PN5180_NSS(SSpin),
+  PN5180_BUSY(BUSYpin),
+  PN5180_RST(RSTpin),
+  PN5180_SPI(spi)
 {
   /*
    * 11.4.1 Physical Host Interface

@@ -30,7 +30,7 @@
 class PN5180ISO14443 : public PN5180 {
 
 public:
-  PN5180ISO14443(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin, uint8_t SCKpin, uint8_t MISOpin, uint8_t MOSIpin, SPIClass& spi=SPI);
+  //PN5180ISO14443(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin, uint8_t SCKpin, uint8_t MISOpin, uint8_t MOSIpin, SPIClass& spi=SPI);
   PN5180ISO14443(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin, SPIClass& spi=SPI);
   
 private:
